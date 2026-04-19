@@ -18,7 +18,7 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
     }
     @Override
     public boolean registrarReferenciaUsuario(UsuarioCllbckInt usuario) throws RemoteException {
-        String nick = usuario.obtenerNickName();
+        String nick = usuario.getNickName();
 
         if (usuarios.containsKey(nick)) {
             return false; // nickname ya existe
@@ -36,7 +36,7 @@ public void enviarMensaje(String mensaje) throws RemoteException {
     while (it.hasNext()) {
         Map.Entry<String, UsuarioCllbckInt> entry = it.next();
         try {
-            entry.getValue().recibirMensaje(mensaje);
+            entry.getValue().notificarEspecifico(mensaje);
         } catch (Exception e) {
             System.out.println("Usuario desconectado eliminado: " + entry.getKey());
             it.remove(); // eliminar si falló
@@ -59,15 +59,15 @@ public void enviarMensajePrivado(String emisor, String receptor, String mensaje)
     UsuarioCllbckInt usuarioEmisor = usuarios.get(emisor);
 
     if (usuarioReceptor == null) {
-        usuarioEmisor.recibirMensaje("El usuario no está conectado");
+        usuarioEmisor.notificarEspecifico("El usuario no está conectado");
         return;
     }
 
     try {
-        usuarioReceptor.recibirMensaje("[Privado de " + emisor + "]: " + mensaje);
+        usuarioReceptor.notificarEspecifico("[Privado de " + emisor + "]: " + mensaje);
     } catch (Exception e) {
         usuarios.remove(receptor);
-        usuarioEmisor.recibirMensaje("El mensaje no se logró enviar porque el usuario receptor no está conectado");
+        usuarioEmisor.notificarEspecifico("El mensaje no se logró enviar porque el usuario receptor no está conectado");
     }
 }
 @Override

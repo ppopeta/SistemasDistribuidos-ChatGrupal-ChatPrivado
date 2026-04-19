@@ -20,4 +20,5 @@ public interface UsuarioCllbckInt extends Remote {
      * Notificación privada: mensaje privado o mensaje del sistema.
      */
     public void notificarEspecifico(String mensaje) throws RemoteException;
+    
 }
