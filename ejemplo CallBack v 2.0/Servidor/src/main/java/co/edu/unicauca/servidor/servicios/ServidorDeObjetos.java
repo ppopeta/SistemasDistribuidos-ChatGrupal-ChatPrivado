@@ -2,7 +2,6 @@
 package co.edu.unicauca.servidor.servicios;
 
 import co.edu.unicauca.servidor.controladores.ControladorServidorChatImpl;
-import co.edu.unicauca.servidor.utilidades.UtilidadesConsola;
 import co.edu.unicauca.servidor.utilidades.UtilidadesRegistroS;
 import java.rmi.RemoteException;
 
@@ -10,14 +9,10 @@ public class ServidorDeObjetos
 {
     public static void main(String args[]) throws RemoteException
     {        
-         
-        int numPuertoRMIRegistry = 0;
-        String direccionIpRMIRegistry = "";
-                       
-        System.out.println("Cual es el la dirección ip donde se encuentra  el rmiRegistry ");
-        direccionIpRMIRegistry = UtilidadesConsola.leerCadena();
-        System.out.println("Cual es el número de puerto por el cual escucha el rmiRegistry ");
-        numPuertoRMIRegistry = UtilidadesConsola.leerEntero(); 
+        String direccionIpRMIRegistry = UtilidadesRegistroS.obtenerIpNS();
+        int numPuertoRMIRegistry = UtilidadesRegistroS.obtenerPuertoNS();
+
+        System.out.println("Iniciando servidor con NS en " + direccionIpRMIRegistry + ":" + numPuertoRMIRegistry);
      
         ControladorServidorChatImpl objRemoto = new ControladorServidorChatImpl();//se leasigna el puerto de escucha del objeto remoto
         

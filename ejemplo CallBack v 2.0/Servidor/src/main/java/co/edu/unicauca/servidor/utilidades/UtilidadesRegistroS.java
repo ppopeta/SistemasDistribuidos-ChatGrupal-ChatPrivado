@@ -2,14 +2,52 @@
 package co.edu.unicauca.servidor.utilidades;
 
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Properties;
 public class UtilidadesRegistroS
 {
+        private static final String PROPERTIES_FILE = "/config.properties";
+
+        public static String obtenerIpNS() {
+                Properties props = cargarProperties();
+                String ip = props.getProperty("ns.ip", "localhost");
+                System.out.println("[Config] IP del NS: " + ip);
+                return ip;
+        }
+
+        public static int obtenerPuertoNS() {
+                Properties props = cargarProperties();
+                String puerto = props.getProperty("ns.puerto", "1099");
+                try {
+                        int p = Integer.parseInt(puerto);
+                        System.out.println("[Config] Puerto del NS: " + p);
+                        return p;
+                } catch (NumberFormatException e) {
+                        System.err.println("[Config] Puerto inválido, usando 1099 por defecto.");
+                        return 1099;
+                }
+        }
+
+        private static Properties cargarProperties() {
+                Properties props = new Properties();
+                try (InputStream input = UtilidadesRegistroS.class.getResourceAsStream(PROPERTIES_FILE)) {
+                        if (input == null) {
+                                System.err.println("[Config] No se encontró " + PROPERTIES_FILE + ". Usando valores por defecto.");
+                                return props;
+                        }
+                        props.load(input);
+                } catch (Exception e) {
+                        System.err.println("[Config] Error al leer " + PROPERTIES_FILE + ": " + e.getMessage());
+                }
+                return props;
+        }
+
 	public static void arrancarNS(int numPuertoRMI) throws RemoteException 
 	{
             try
