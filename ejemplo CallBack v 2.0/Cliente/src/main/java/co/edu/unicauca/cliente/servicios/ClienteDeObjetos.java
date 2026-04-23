@@ -30,8 +30,10 @@ public class ClienteDeObjetos {
                 return;
             }
 
-            // (a) Registrar referencia remota con nickName
-            // (b) El servidor valida que sea único; si no lo es, notifica y pedimos otro
+            // a) Permitir al cliente registrar su referencia remota junto con un nickName
+
+            // 1. Registrar referencia remota con nickName
+            // 2. El servidor valida que sea único, si no lo es, notifica y pedimos otro
             UsuarioCllbckImpl objUsuario = null;
             boolean registrado = false;
 
@@ -43,6 +45,8 @@ public class ClienteDeObjetos {
                     continue;
                 }
                 objUsuario = new UsuarioCllbckImpl(nickName);
+
+                // Registro del usuario en el servidor
                 registrado = servidor.registrarReferenciaUsuario(objUsuario);
                 if (!registrado) {
                     System.out.println("NickName '" + nickName + "' ya está en uso. Intente con otro.");

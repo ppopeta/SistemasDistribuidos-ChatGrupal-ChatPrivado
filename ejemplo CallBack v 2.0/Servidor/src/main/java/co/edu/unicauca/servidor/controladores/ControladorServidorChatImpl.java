@@ -15,8 +15,12 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
 
     public ControladorServidorChatImpl() throws RemoteException {
         super();
+        // El HashMap permite almacenar usuarios con acceso rápido por nickName, lo que
+        // es esencial para validar unicidad y enviar mensajes privados eficientemente.
         usuarios = new HashMap<>();
     }
+
+    // b) Validar que el nickName sea único
 
     @Override
     public synchronized boolean registrarReferenciaUsuario(UsuarioCllbckInt usuario) throws RemoteException {
@@ -25,6 +29,12 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         if (nick.isEmpty()) {
             return false;
         }
+        /*
+         * el metodo containsKey permite verificar si el nickName ya existe en el
+         * HashMap, lo que garantiza la unicidad de los usuarios registrados en el chat.
+         * Si el nickName ya está registrado, se devuelve false para indicar que no se
+         * pudo registrar al usuario con ese nickName.
+         */
 
         if (usuarios.containsKey(nick)) {
             return false;
@@ -53,20 +63,26 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         }
     }
 
+    // c) Permitir al cliente ver los nickNames de los usuarios registrados y
+    // activos
     @Override
     public synchronized ArrayList<String> obtenerNickNamesActivos() throws RemoteException {
         depurarUsuariosDesconectados();
         return new ArrayList<>(usuarios.keySet());
     }
 
+    // d) Permitir al cliente salir del chat, eliminando su referencia remota del
+    // servidor
     @Override
     public synchronized void salirDelChat(String nickName) throws RemoteException {
         usuarios.remove(nickName);
         System.out.println("Usuario salió: " + nickName);
     }
 
+    // e) Permitir al cliente enviar un mensaje privado a otro usuario determinado
     @Override
-    public synchronized void enviarMensajePrivado(String emisor, String receptor, String mensaje) throws RemoteException {
+    public synchronized void enviarMensajePrivado(String emisor, String receptor, String mensaje)
+            throws RemoteException {
         UsuarioCllbckInt usuarioEmisor = usuarios.get(emisor);
         if (usuarioEmisor == null) {
             return;
@@ -77,7 +93,8 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
             usuarioEmisor.notificarEspecifico(MENSAJE_RECEPTOR_DESCONECTADO);
             return;
         }
-
+        // f) Servidor comprueba conexión antes de reenviar chat privado, elimina
+        // referencia si terminó abruptamente y notifica al emisor
         if (!estaConectado(usuarioReceptor)) {
             usuarios.remove(receptor);
             usuarioEmisor.notificarEspecifico(MENSAJE_RECEPTOR_DESCONECTADO);
@@ -91,13 +108,14 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
             usuarioEmisor.notificarEspecifico(MENSAJE_RECEPTOR_DESCONECTADO);
         }
     }
-
+    // h) Permitir al cliente consultar la cantidad de usuarios activos
     @Override
     public synchronized int obtenerCantidadUsuariosActivos() throws RemoteException {
         depurarUsuariosDesconectados();
         return usuarios.size();
     }
-
+    //g) Servidor comprueba conexión antes de reenviar chat público; elimina referencia si terminó abruptamente
+    // Método para eliminar usuarios desconectados del HashMap
     private void depurarUsuariosDesconectados() {
         Iterator<Map.Entry<String, UsuarioCllbckInt>> it = usuarios.entrySet().iterator();
         while (it.hasNext()) {
@@ -109,6 +127,7 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
         }
     }
 
+    // Método para verificar si un usuario aún está conectado intentando acceder a su nickName
     private boolean estaConectado(UsuarioCllbckInt usuario) {
         try {
             usuario.getNickName();
@@ -117,4 +136,4 @@ public class ControladorServidorChatImpl extends UnicastRemoteObject implements 
             return false;
         }
     }
-}
+}   
